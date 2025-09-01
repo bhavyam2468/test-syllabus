@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEE Test Schedule</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --text-color: #e0e0e0;
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-wrapper {
+            flex-grow: 1;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #2c2c2c;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .filter-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .view-toggle button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-color);
+            background-color: transparent;
+            color: var(--primary-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .view-toggle button.active {
+            background-color: var(--primary-color);
+            color: #000;
+        }
+
+        #eventsContainer {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        /* Grid View */
+        #eventsContainer.grid-view {
+             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+
+        .event-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .event-header h2 {
+            color: var(--text-color);
+            font-size: 1.25rem;
+        }
+        
+        .event-header .date {
+            color: var(--secondary-color);
+            font-weight: bold;
+            white-space: nowrap;
+            margin-left: 1rem;
+        }
+
+        .syllabus-section h3 {
+            color: var(--primary-color);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .syllabus-section ul {
+            list-style-type: none;
+            padding-left: 0.5rem;
+        }
+        
+        .syllabus-section li {
+            position: relative;
+            padding-left: 1.2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .syllabus-section li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+        }
+
+        /* Logic for hiding sections */
+        .hide-syllabus .syllabus-content,
+        .hide-physics .physics-syllabus,
+        .hide-chemistry .chemistry-syllabus,
+        .hide-maths .maths-syllabus {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>JEE Test Schedule</h1>
+            <p>Your upcoming Mains (M) and Advanced (A) tests.</p>
+        </header>
+
+        <div class="controls">
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="Search by date, title, chapter...">
+            </div>
+            <div class="filter-group view-toggle">
+                <button id="listViewBtn" class="active">List View</button>
+                <button id="gridViewBtn">Grid View</button>
+            </div>
+        </div>
+
+        <div class="controls" id="filterControls">
+             <div class="filter-group">
+                <span>Type:</span>
+                <label><input type="checkbox" class="filter-type" value="M" checked> Mains</label>
+                <label><input type="checkbox" class="filter-type" value="A" checked> Advanced</label>
+            </div>
+            <div class="filter-group">
+                <span>Syllabus:</span>
+                <label><input type="checkbox" id="togglePhysics" checked> Physics</label>
+                <label><input type="checkbox" id="toggleChemistry" checked> Chemistry</label>
+                <label><input type="checkbox" id="toggleMaths" checked> Maths</label>
+                <label><input type="checkbox" id="toggleSyllabus"> Hide All</label>
+            </div>
+        </div>
+
+        <div id="eventsContainer">
+            </div>
+    </div>
+
+    <script>
+        const eventsData = [
+            {
+                title: "TE-04(M)",
+                date: "2025-09-06",
+                type: "M",
+                physics: ["Alternating Current", "Electromagnetic Waves", "Ray Optics and Optical Instruments"],
+                chemistry: ["Alcohols, Phenols and Ethers", "Aldehydes, Ketones and Carboxylic acids"],
+                maths: ["Definite Integration", "Application of integrals", "Differential Equations"]
+            },
+            {
+                title: "TE-04(A)",
+                date: "2025-09-07",
+                type: "A",
+                physics: ["Alternating Current", "Electromagnetic Waves", "Ray Optics and Optical Instruments"],
+                chemistry: ["Alcohols, Phenols and Ethers", "Aldehydes, Ketones and Carboxylic acids"],
+                maths: ["Definite Integration", "Application of integrals", "Differential Equations"]
+            },
+            {
+                title: "JEE AITS-02 (Main)",
+                date: "2025-09-20",
+                type: "M",
+                physics: ["Magnetism and Matter", "Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves", "Ray Optics and Optical Instruments"],
+                chemistry: ["The d-and f-Block Elements", "Coordination Compounds", "Haloalkanes and Haloarenes", "Alcohols, Phenols, and Ethers", "Aldehydes and Ketones Carboxylic Acids"],
+                maths: ["Application of Derivatives", "Indefinite integrals", "Definite integrals", "Application of Integrals", "Differential Equations"]
+            },
+            {
+                title: "JEE AITS-02 (Advanced)",
+                date: "2025-09-21",
+                type: "A",
+                physics: ["Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves", "Ray Optics and Optical Instruments"],
+                chemistry: ["The d-and f-Block Elements", "Coordination Compounds", "Haloalkanes and Haloarenes", "Alcohols, Phenols, and Ethers", "Aldehydes and Ketones, Carboxylic Acids", "States of Matter", "Environmental Chemistry"],
+                maths: ["Application of Derivatives", "Indefinite integrals", "Definite integrals", "Application of Integrals", "Differential Equations"]
+            },
+            {
+                title: "TE-05(M)",
+                date: "2025-10-04",
+                type: "M",
+                physics: ["Wave Optics", "Dual Nature of radiation and Matter", "Atoms"],
+                chemistry: ["Amines", "Biomolecules", "Solid State", "Surface Chemistry"],
+                maths: ["Vectors", "3D Geometry"]
+            },
+            {
+                title: "TE-05(A)",
+                date: "2025-10-05",
+                type: "A",
+                physics: ["Wave Optics", "Dual Nature of radiation and Matter", "Atoms"],
+                chemistry: ["Amines", "Biomolecules", "Solid State", "Surface Chemistry"],
+                maths: ["Vectors", "3D Geometry"]
+            },
+            {
+                title: "FT-11(M)",
+                date: "2025-10-11",
+                type: "M",
+                physics: ["Nuclei", "Semiconductors", "Experimental Physics"],
+                chemistry: ["General Principles and Processes of Isolation of Elements", "Polymers", "Chemistry in Everyday Life"],
+                maths: ["Probability"]
+            },
+            {
+                title: "JEE AITS-03 (Main)",
+                date: "2025-10-18",
+                type: "M",
+                physics: ["Wave Optics", "Dual Nature of Radiation and Matter", "Atoms", "Nuclei", "Semiconductor Electronics", "Experimental Physics", "Units and Measurements", "Motion in a Straight Line", "Motion in a Plane"],
+                chemistry: ["Amines", "Biomolecules", "Practical Chemistry", "Some Basic Concepts of Chemistry", "Structure of Atom"],
+                maths: ["Vector Algebra", "Three Dimensional Geometry", "Permutations and Combinations", "Probability"]
+            },
+            {
+                title: "JEE AITS-03 (Advanced)",
+                date: "2025-10-19",
+                type: "A",
+                physics: ["Laws of Motion", "Work, Energy and Power", "System of Particles Rotational Motion", "Gravitation"],
+                chemistry: ["Amines", "Biomolecules", "Practical Chemistry", "Polymers", "Wave Optics", "Dual Nature of Radiation and Matter", "Atoms", "Nuclei", "Solid State", "Surface Physics"],
+                maths: ["Vector Algebra", "Three Dimensional Geometry", "Permutations and Combinations", "Probability"]
+            },
+            {
+                title: "JEE AITS - 04 (Main)",
+                date: "2025-11-15",
+                type: "M",
+                physics: ["Laws of Motion", "Work, Energy and Power", "System of Particles and Rotational Motion", "Gravitation"],
+                chemistry: ["Classification of Elements and Periodicity in Properties", "Chemical Bonding and Molecular Structure", "Thermodynamics"],
+                maths: ["Complex numbers", "Quadratic equations", "Sequence and Series", "Binomial Theorem", "Statistics"]
+            },
+            {
+                title: "JEE AITS-04 (Advanced)",
+                date: "2025-11-16",
+                type: "A",
+                physics: ["Mechanical Properties of Solids", "Mechanical Properties of Fluids", "Thermal Properties of Matter", "Thermodynamics", "Kinetic Theory", "Oscillations", "Waves"],
+                chemistry: ["Some Basic Concepts of Chemistry", "Structure of Atom", "Classification of Elements and Periodicity in Properties", "Chemical Bonding and Molecular Structure", "Thermodynamics", "S-Block Elements", "Hydrogen and its compounds"],
+                maths: ["Complex numbers", "Quadratic equations", "Sequence and Series", "Logarithms", "Binomial Theorem", "Statistics"]
+            },
+            {
+                title: "JEE AITS - 05 (Main)",
+                date: "2025-12-14",
+                type: "M",
+                physics: ["Mechanical Properties of Solids", "Mechanical Properties of Fluids", "Thermal Properties of Matter", "Thermodynamics", "Kinetic Theory", "Oscillations", "Waves"],
+                chemistry: ["Equilibrium", "Redox reactions", "p-block elements (Groups 13 and 14)", "Organic Chemistry Some Basic Principles and Techniques", "Hydrocarbons"],
+                maths: ["Introduction to 2D Coordinate Geometry", "Straight Line", "Circles", "Parabola", "Ellipse", "Hyperbola", "Trigonometric Functions"]
+            },
+            {
+                title: "JEE AITS-05 (Advanced)",
+                date: "2025-12-15",
+                type: "A",
+                physics: ["Mechanical Properties of Solids", "Mechanical Properties of Fluids", "Thermal Properties of Matter", "Thermodynamics", "Kinetic Theory", "Oscillations (including Forced and Damped Oscillations)", "Waves (including Doppler Effect)"],
+                chemistry: ["Equilibrium", "Redox reactions", "p-block elements (Groups 13 and 14)", "Boron, Aluminium and Carbon compounds", "Silicates, Silicones and Zeolites", "Organic Chemistry- Some Basic Principles and Techniques", "Hydrocarbons"],
+                maths: ["Introduction to 2D Coordinate Geometry", "Straight Line", "Circles", "Parabola", "Ellipse", "Hyperbola", "Trigonometric Functions"]
+            }
+        ];
+
+        const eventsContainer = document.getElementById('eventsContainer');
+        const searchInput = document.getElementById('searchInput');
+        const filterControls = document.getElementById('filterControls');
+        const mainContainer = document.querySelector('.container');
+        const listViewBtn = document.getElementById('listViewBtn');
+        const gridViewBtn = document.getElementById('gridViewBtn');
+
+
+        const renderEvents = (filteredEvents) => {
+            eventsContainer.innerHTML = '';
+            if (filteredEvents.length === 0) {
+                eventsContainer.innerHTML = '<p>No events match your criteria.</p>';
+                return;
+            }
+            
+            filteredEvents.forEach(event => {
+                const eventCard = document.createElement('div');
+                eventCard.className = 'event-card';
+
+                const formattedDate = new Date(event.date + 'T00:00:00').toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                eventCard.innerHTML = `
+                    <div class="event-header">
+                        <h2>${event.title}</h2>
+                        <span class="date">${formattedDate}</span>
+                    </div>
+                    <div class="syllabus-content">
+                        <div class="syllabus-section physics-syllabus">
+                            <h3>Physics</h3>
+                            <ul>${event.physics.map(item => `<li>${item}</li>`).join('')}</ul>
+                        </div>
+                        <div class="syllabus-section chemistry-syllabus">
+                            <h3>Chemistry</h3>
+                            <ul>${event.chemistry.map(item => `<li>${item}</li>`).join('')}</ul>
+                        </div>
+                        <div class="syllabus-section maths-syllabus">
+                            <h3>Mathematics</h3>
+                            <ul>${event.maths.map(item => `<li>${item}</li>`).join('')}</ul>
+                        </div>
+                    </div>
+                `;
+                eventsContainer.appendChild(eventCard);
+            });
+        };
+
+        const applyFilters = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedTypes = Array.from(document.querySelectorAll('.filter-type:checked')).map(cb => cb.value);
+
+            const filtered = eventsData.filter(event => {
+                const matchesSearch = searchTerm === '' ||
+                    event.title.toLowerCase().includes(searchTerm) ||
+                    event.date.includes(searchTerm) ||
+                    event.physics.join(' ').toLowerCase().includes(searchTerm) ||
+                    event.chemistry.join(' ').toLowerCase().includes(searchTerm) ||
+                    event.maths.join(' ').toLowerCase().includes(searchTerm);
+                
+                const matchesType = selectedTypes.length === 0 || selectedTypes.includes(event.type);
+
+                return matchesSearch && matchesType;
+            });
+            
+            renderEvents(filtered);
+        };
+        
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderEvents(eventsData);
+        });
+
+        searchInput.addEventListener('input', applyFilters);
+        filterControls.addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                 // Handle Type Filters
+                if (e.target.classList.contains('filter-type')) {
+                    applyFilters();
+                }
+                
+                // Handle Syllabus visibility toggles
+                const targetId = e.target.id;
+                if (targetId === 'toggleSyllabus') {
+                    mainContainer.classList.toggle('hide-syllabus', e.target.checked);
+                } else if (targetId === 'togglePhysics') {
+                    mainContainer.classList.toggle('hide-physics', !e.target.checked);
+                } else if (targetId === 'toggleChemistry') {
+                    mainContainer.classList.toggle('hide-chemistry', !e.target.checked);
+                } else if (targetId === 'toggleMaths') {
+                    mainContainer.classList.toggle('hide-maths', !e.target.checked);
+                }
+            }
+        });
+
+        // View Toggler
+        listViewBtn.addEventListener('click', () => {
+            eventsContainer.classList.remove('grid-view');
+            listViewBtn.classList.add('active');
+            gridViewBtn.classList.remove('active');
+        });
+
+        gridViewBtn.addEventListener('click', () => {
+            eventsContainer.classList.add('grid-view');
+            gridViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+        });
+
+    </script>
+</body>
+</html>
